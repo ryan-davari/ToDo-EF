@@ -1,0 +1,39 @@
+@use '../../_variables' as vars;
+
+.layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background-color: vars.$background-color;
+}
+
+.toolbar {
+  background-color: vars.$primary-color;
+  color: vars.$primary-contrast;
+}
+
+.app-title {
+  font-weight: 500;
+  font-size: vars.$font-size-title;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.main-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.content {
+  padding: vars.$content-padding;
+  width: min(100%, vars.$content-max-width);
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.active-link {
+  font-weight: 600;
+  text-decoration: underline;
+}

@@ -1,0 +1,35 @@
+.task-dialog {
+  padding: 20px 24px 16px;
+  max-width: 100%;
+}
+
+.task-dialog__title {
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.task-dialog__body {
+  margin-bottom: 16px;
+}
+
+.task-dialog__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.task-dialog__field {
+  width: 100%;
+}
+
+.task-dialog__required {
+  color: red;
+  margin-left: 4px;
+}
+
+.task-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

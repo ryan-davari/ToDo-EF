@@ -1,0 +1,36 @@
+@use '../../../_variables' as vars;
+
+.about {
+  display: flex;
+  justify-content: center;
+  padding: vars.$content-padding;
+}
+
+.about__panel {
+  width: 100%;
+  max-width: vars.$content-max-width;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 16px 20px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.about__title {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.about__subtitle {
+  margin-top: 16px;
+  margin-bottom: 4px;
+  font-size: 1.05rem;
+}
+
+.about__text {
+  margin-top: 0;
+}
+
+.about__list {
+  margin: 0 0 4px 1.2rem;
+  padding: 0;
+}

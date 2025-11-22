@@ -1,0 +1,26 @@
+<div class="layout">
+  <header>
+    <mat-toolbar color="primary" class="toolbar">
+      <span class="app-title">{{ appTitle }}</span>
+
+      <span class="spacer"></span>
+
+      <nav class="main-nav" aria-label="Main navigation">
+        <button
+          mat-button
+          routerLink="/tasks"
+          routerLinkActive="active-link"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          ToDo List
+        </button>
+
+        <button mat-button routerLink="/about" routerLinkActive="active-link">About</button>
+      </nav>
+    </mat-toolbar>
+  </header>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

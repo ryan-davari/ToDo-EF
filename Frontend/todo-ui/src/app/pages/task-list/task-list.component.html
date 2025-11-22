@@ -1,0 +1,66 @@
+<section class="task-list">
+  <h1 class="task-list__title">{{ title() }}</h1>
+
+  <div class="task-list__panel">
+    <div class="task-list__header">
+      <button mat-raised-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        <span>Add Task</span>
+      </button>
+
+      <div class="task-list__show-all">
+        <mat-checkbox [checked]="showAll()" (change)="toggleShowAll($event.checked)">
+          Show all
+        </mat-checkbox>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    @if (visibleTasks().length) {
+    <div class="task-list__items">
+      @for (task of visibleTasks(); track task.id) {
+      <article
+        class="task-list__item"
+        (click)="openEditDialog(task)"
+        [class.task-list__item--complete]="task.isComplete"
+      >
+        <div class="task-list__item-main">
+          <mat-checkbox
+            class="task-list__item-checkbox"
+            [checked]="task.isComplete"
+            (click)="$event.stopPropagation()"
+            (change)="toggleCompletion(task, $event.checked)"
+            aria-label="Mark task as complete"
+          >
+          </mat-checkbox>
+
+          <div class="task-list__item-text">
+            <h2 class="task-list__item-title">
+              {{ task.title }}
+            </h2>
+
+            @if (task.description) {
+            <p class="task-list__item-description">
+              {{ task.description }}
+            </p>
+            }
+          </div>
+        </div>
+
+        <button
+          mat-icon-button
+          color="warn"
+          (click)="deleteTask(task, $event)"
+          aria-label="Delete task"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </article>
+      }
+    </div>
+    } @else {
+    <p class="task-list__empty">No tasks yet. Use “Add Task” to create one.</p>
+    }
+  </div>
+</section>

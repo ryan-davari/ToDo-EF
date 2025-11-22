@@ -1,0 +1,59 @@
+// Angular Material Theming (Material 3)
+@use '@angular/material' as mat;
+
+// Your custom variables
+@use './variables' as vars;
+
+// --------------------
+// Angular Material Theme
+// --------------------
+html {
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
+
+// --------------------
+// Global body defaults
+// --------------------
+body {
+  color-scheme: light;
+
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+
+  margin: 0;
+  height: 100%;
+}
+
+// --------------------
+// Additional global reset
+// --------------------
+html,
+body {
+  height: 100%;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+// --------------------
+// custom global styles
+// --------------------
+:root {
+  --app-content-max-width: #{vars.$content-max-width};
+  --app-content-padding: #{vars.$content-padding};
+}
+
+// Optional global utility classes
+.app-container {
+  padding: var(--app-content-padding);
+  max-width: var(--app-content-max-width);
+  margin: 0 auto;
+}
