@@ -2,7 +2,7 @@
 using Moq;
 using ToDo.Api.Dtos;
 using ToDo.DAL.Models;
-using ToDo.Api.Repositories;
+using ToDo.DAL.Repositories;
 using ToDo.Api.Services;
 using Xunit;
 

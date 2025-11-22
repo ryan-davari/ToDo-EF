@@ -2,9 +2,10 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using ToDo.Api.Mapping;
 using ToDo.Api.Middlewares;
-using ToDo.Api.Repositories;
+
 using ToDo.Api.Services;
 using ToDo.DAL;
+using ToDo.DAL.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +14,7 @@ builder.Services.AddControllers();
 
 // Dependency Injection – register app services here
 builder.Services.AddScoped<ITaskItemService, TaskItemService>();
-builder.Services.AddSingleton<ITaskItemRepository, TaskItemRepository>();
+builder.Services.AddScoped<ITaskItemRepository, TaskItemRepository>();
 
 // AutoMapper
 var mapperConfig = new MapperConfiguration(cfg =>

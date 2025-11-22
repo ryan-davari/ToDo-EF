@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using ToDo.Api.Dtos;
 using ToDo.DAL.Models;
-using ToDo.Api.Repositories;
+using ToDo.DAL.Repositories;
 
 namespace ToDo.Api.Services;
 

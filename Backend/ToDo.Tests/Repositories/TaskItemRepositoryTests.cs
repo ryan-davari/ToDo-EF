@@ -1,9 +1,10 @@
-﻿
-
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using ToDo.DAL;
 using ToDo.DAL.Models;
-using ToDo.Api.Repositories;
+using ToDo.DAL.Repositories;
 using Xunit;
 
 namespace ToDo.Api.Tests.Repositories;
@@ -11,7 +12,15 @@ namespace ToDo.Api.Tests.Repositories;
 public class TaskItemRepositoryTests
 {
     private TaskItemRepository CreateRepository()
-        => new TaskItemRepository();
+    {
+        // Use a unique in-memory DB per test to avoid cross-test interference
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+
+        var context = new AppDbContext(options);
+        return new TaskItemRepository(context);
+    }
 
     [Fact]
     public async Task AddAsync_AssignsId_AndStoresItem()
@@ -41,7 +50,7 @@ public class TaskItemRepositoryTests
         Assert.Equal("Test description", stored.Description);
         Assert.False(stored.IsComplete);
 
-        // CreatedAt should be auto-populated
+        // CreatedAt should be auto-populated (either by repo or caller)
         Assert.NotEqual(default(DateTime), stored.CreatedAt);
         Assert.True(stored.CreatedAt <= DateTime.UtcNow);
     }
