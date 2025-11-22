@@ -1,4 +1,4 @@
-﻿using ToDo.Api.Models;
+﻿using ToDo.DAL.Models;
 
 namespace ToDo.Api.Repositories;
 

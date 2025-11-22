@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Moq;
 using ToDo.Api.Dtos;
-using ToDo.Api.Models;
+using ToDo.DAL.Models;
 using ToDo.Api.Repositories;
 using ToDo.Api.Services;
 using Xunit;

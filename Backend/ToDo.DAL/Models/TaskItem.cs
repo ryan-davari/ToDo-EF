@@ -1,4 +1,4 @@
-﻿namespace ToDo.Api.Models;
+﻿namespace ToDo.DAL.Models;
 
 public class TaskItem
 {

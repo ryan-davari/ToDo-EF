@@ -2,7 +2,7 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using ToDo.Api.Models;
+using ToDo.DAL.Models;
 using ToDo.Api.Repositories;
 using Xunit;
 

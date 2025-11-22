@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading;
-using ToDo.Api.Models;
+using ToDo.DAL.Models;
 
 namespace ToDo.Api.Repositories;
 
