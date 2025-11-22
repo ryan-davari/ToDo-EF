@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ToDo.Api\ToDo.Api.csproj" />
+    <ProjectReference Include="..\ToDo.DAL\ToDo.DAL.csproj" />
   </ItemGroup>
 
   <ItemGroup>
