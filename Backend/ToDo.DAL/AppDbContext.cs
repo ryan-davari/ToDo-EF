@@ -60,7 +60,7 @@ namespace ToDo.DAL
                       .HasDefaultValueSql("GETUTCDATE()");
 
                 entity.Property(x => x.UserId)
-                      .IsRequired();
+                      .IsRequired(false);
 
                 entity.HasOne(x => x.User)
                       .WithMany()

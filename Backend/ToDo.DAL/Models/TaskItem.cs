@@ -12,7 +12,7 @@ public class TaskItem
 
     public DateTime CreatedAt { get; set; }
 
-    public string UserId { get; set; } = null!;
+    public string? UserId { get; set; }
 
-    public AppUser User { get; set; } = null!;
+    public AppUser? User { get; set; } = null!;
 }

@@ -51,13 +51,13 @@ namespace ToDo.DAL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "8155d41a-b978-4276-9584-a46e168854b9",
+                            Id = "0fdcefdb-2e28-4614-9d08-c79d7ac3b4cf",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "f4c7e436-a0d0-4d75-ac7f-18deec55b32f",
+                            Id = "9daf4b34-187e-45a4-b562-934da97cfd55",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -258,7 +258,6 @@ namespace ToDo.DAL.Migrations
                         .HasColumnType("varchar(100)");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -266,14 +265,6 @@ namespace ToDo.DAL.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("TaskItems", (string)null);
-
-                    b.HasOne("ToDo.DAL.Models.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -325,6 +316,16 @@ namespace ToDo.DAL.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ToDo.DAL.Models.TaskItem", b =>
+                {
+                    b.HasOne("ToDo.DAL.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }
