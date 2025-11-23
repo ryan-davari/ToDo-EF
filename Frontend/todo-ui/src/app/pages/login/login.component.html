@@ -1,0 +1,36 @@
+<section class="auth-shell">
+  <div class="auth-card">
+    <div class="auth-card__header">
+      <h1 class="auth-card__title">Welcome back</h1>
+      <p class="auth-card__subtitle">Sign in to continue managing your tasks.</p>
+    </div>
+
+    <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()" autocomplete="on" novalidate>
+      <mat-form-field appearance="outline" class="auth-form__field">
+        <mat-label>Username</mat-label>
+        <input matInput type="text" formControlName="username" required />
+        <mat-icon matSuffix>person</mat-icon>
+        <mat-error *ngIf="form.controls.username.hasError('required')">Username is required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="auth-form__field">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" formControlName="password" required />
+        <mat-icon matSuffix>lock</mat-icon>
+        <mat-error *ngIf="form.controls.password.hasError('required')">Password is required</mat-error>
+      </mat-form-field>
+
+      <button mat-flat-button color="primary" class="auth-form__submit" type="submit" [disabled]="loading()">
+        <span *ngIf="!loading()">Log in</span>
+        <mat-progress-spinner *ngIf="loading()" diameter="22" mode="indeterminate"></mat-progress-spinner>
+      </button>
+
+      <p class="auth-form__message" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+    </form>
+
+    <p class="auth-card__footer">
+      New here?
+      <a routerLink="/register">Create an account</a>
+    </p>
+  </div>
+</section>
