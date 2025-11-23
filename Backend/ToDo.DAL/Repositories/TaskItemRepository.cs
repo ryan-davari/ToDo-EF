@@ -18,10 +18,11 @@ public class TaskItemRepository : ITaskItemRepository
     /// <summary>
     /// Returns all task items ordered by CreatedAt.
     /// </summary>
-    public async Task<IEnumerable<TaskItem>> GetAllAsync()
+    public async Task<IEnumerable<TaskItem>> GetAllAsync(string userId)
     {
         return await _dbContext.TaskItems
             .AsNoTracking()
+            .Where(t => t.UserId == userId)
             .OrderBy(t => t.CreatedAt)
             .ToListAsync();
     }
@@ -29,9 +30,11 @@ public class TaskItemRepository : ITaskItemRepository
     /// <summary>
     /// Returns a task item by its Id, or null if it doesn't exist.
     /// </summary>
-    public async Task<TaskItem?> GetByIdAsync(int id)
+    public async Task<TaskItem?> GetByIdAsync(int id, string userId)
     {
-        return await _dbContext.TaskItems.FindAsync(id);
+        return await _dbContext.TaskItems
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
     }
 
     /// <summary>
@@ -54,9 +57,9 @@ public class TaskItemRepository : ITaskItemRepository
     /// <summary>
     /// Updates an existing task item, or returns null if it doesn't exist.
     /// </summary>
-    public async Task<TaskItem?> UpdateAsync(TaskItem taskItem)
+    public async Task<TaskItem?> UpdateAsync(TaskItem taskItem, string userId)
     {
-        var existing = await _dbContext.TaskItems.FindAsync(taskItem.Id);
+        var existing = await _dbContext.TaskItems.FirstOrDefaultAsync(t => t.Id == taskItem.Id && t.UserId == userId);
         if (existing is null)
         {
             return null;
@@ -72,9 +75,10 @@ public class TaskItemRepository : ITaskItemRepository
     /// <summary>
     /// Deletes a task by its Id.
     /// </summary>
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id, string userId)
     {
-        var existing = await _dbContext.TaskItems.FindAsync(id);
+        var existing = await _dbContext.TaskItems
+            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
         if (existing is null)
         {
             return false;

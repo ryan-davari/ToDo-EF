@@ -15,11 +15,13 @@ public class TaskItemProfile : Profile
         CreateMap<CreateTaskItemRequest, TaskItem>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.IsComplete, opt => opt.Ignore())
-            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore());
 
         // Update request -> existing Domain entity
         CreateMap<UpdateTaskItemRequest, TaskItem>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore());
     }
 }
