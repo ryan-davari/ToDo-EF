@@ -1,112 +1,230 @@
 # ToDo Full-Stack Application
 
-TODO list application built using Angular 20 and .NET 8 Web API.
+A complete full-stack TODO list application built with **Angular 20** and **.NET 8 Web API**, featuring:
 
-## Repository
+- SQL Server persistence via **Entity Framework Core**
+- User authentication with **ASP.NET Core Identity**
+- **JWT Bearer Authentication** (UI + API)
+- Role-based authorization (Admin/User)
+- User-specific TODO lists
 
-https://github.com/ryan-davari/ToDo
+---
 
-## Tech Stack
+## 📌 Repository
 
-### Frontend
+https://github.com/ryan-davari/ToDo-EF-SQL
 
-- Angular 20
-- Angular Material
-- SCSS styling
-- Karma + Jasmine unit tests
-- HttpClient + HttpClientTestingModule
+Contains both backend (.NET) and frontend (Angular) projects.
 
-### Backend
+---
 
-- .NET 8 Web API
-- layering: Controller → Service → Repository
-- In-memory data store (no database required)
-- AutoMapper
-- xUnit + Moq unit tests
+# 🚀 Tech Stack
 
-## Features
+## 🖥️ Frontend
 
-- View TODO list
-- Add new tasks
-- Edit tasks
-- Delete tasks
-- Mark complete/incomplete
-- Show/hide completed tasks
-- In-memory backend storage
-- Unit tests (backend + frontend)
+- **Angular 20**
+- **Angular Material**
+- **SCSS styling**
+- **JWT-based authentication**
+- Login & Register pages
+- HTTP interceptor for attaching JWT tokens
+- Route guards for protected routes
+- Task CRUD UI
+- Karma + Jasmine tests
 
-# Running the Application
+---
 
-## 1. Clone the repository
+## 🧩 Backend
 
-- git clone https://github.com/ryan-davari/ToDo.git
-- cd <repo-folder>
+- **.NET 8 Web API**
+- Clean architecture: **Controller → Service → Repository → EF Core**
+- **SQL Server**  
+- **Entity Framework Core 8**  
+  - Code-first migrations  
+  - Fluent API configuration  
+- **ASP.NET Core Identity**  
+  - AppUser model  
+  - Identity tables  
+  - Role seeding (Admin / User)  
+- **JWT Authentication**  
+  - Login / Register  
+  - Token generation (7-day expiry)  
+- AutoMapper for DTOs  
+- xUnit tests + mocking  
 
-# Backend (.NET 8 API)
+---
 
-## Install dependencies
+# 🔒 Authentication & Authorization
 
-- cd ToDo.Api
-- dotnet restore
+The API uses **JWT Bearer Auth** + **ASP.NET Core Identity**.
 
-## Run the API
+### Implemented
 
-- dotnet run
+- Register new users  
+- Login and receive JWT token  
+- Store token in browser (UI)  
+- Angular Auth Interceptor auto-attaches token  
+- All `/api/TaskItem` endpoints require authentication  
+- Each task belongs to a specific user  
+- Users can **only access their own tasks**
 
-API will run at:
+### Main Endpoints
 
-- https://localhost:7083
-- http://localhost:5137
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/Account/register` | Register |
+| POST | `/api/Account/login` | Login & get JWT |
+| GET | `/api/TaskItem` | Get tasks for current user |
+| POST | `/api/TaskItem` | Create task |
+| PUT | `/api/TaskItem/{id}` | Update task |
+| DELETE | `/api/TaskItem/{id}` | Delete task |
 
-# Frontend (Angular UI)
+---
 
-- Angular CLI: 20.3.10
-- Node: 22.19.0
-- Package Manager: npm 10.9.3
-- OS: win32 x64
-- Angular: 20.3.12
+# 🗄️ Database
 
-## Install dependencies
+### Technology
 
-- cd todo-ui
-- npm install
+- SQL Server LocalDB (default)
+- Configured in `appsettings.json`
 
-## Run the UI
+### Apply all EF migrations
 
-- npm start
+```bash
+cd Backend/ToDo.DAL
+dotnet ef database update --startup-project ../ToDo.Api
+```
 
+This creates:
+
+- TaskItems table
+- Identity tables:
+  - AspNetUsers  
+  - AspNetRoles  
+  - AspNetUserRoles  
+  - AspNetUserClaims  
+  - etc.
+
+---
+
+# 📦 Project Structure
+
+```
+Backend/
+ ├── ToDo.Api             → Controllers, Identity, DI, JWT, Swagger
+ ├── ToDo.DAL             → DbContext, Entities, EF Core Migrations
+ ├── ToDo.Api.Tests       → Unit tests
+
+Frontend/
+ └── todo-ui              → Angular 20 application
+```
+
+---
+
+# ▶️ Running the Application
+
+## 1️⃣ Clone the repository
+
+```
+git clone https://github.com/ryan-davari/ToDo-EF-SQL.git
+cd ToDo-EF-SQL
+```
+
+---
+
+# 🧑‍💻 Backend Setup (.NET 8)
+
+### Install dependencies
+
+```
+cd Backend/ToDo.Api
+dotnet restore
+```
+
+### Run the API
+
+```
+dotnet run
+```
+
+API will start at:
+
+- https://localhost:7083  
+- http://localhost:5137  
+
+Swagger UI available at:  
+`/swagger`
+
+---
+
+# 🖥️ Frontend Setup (Angular 20)
+
+### Install dependencies
+
+```
+cd Frontend/todo-ui
+npm install
+```
+
+### Run Angular
+
+```
+npm start
 # or
+ng serve
+```
 
-- ng serve
+Runs at:  
+**http://localhost:4200**
 
-- Runs at:
-- http://localhost:4200
+API base URL is in:  
+`src/environments/environment.ts`
 
-- Backend API URL is located in:
-- src/environments/environment.ts
+---
 
-# Running Tests
+# 🧪 Running Tests
 
 ## Backend Tests
 
-- cd ToDo.Api.Tests
-- dotnet test
+```
+cd Backend/ToDo.Api.Tests
+dotnet test
+```
 
 ## Frontend Tests
 
-- cd todo-ui
-- ng test
+```
+cd Frontend/todo-ui
+ng test
+```
 
-# API Endpoints
+---
 
-- GET /api/TaskItem → Get all tasks
-- GET /api/TaskItem/{id} → Get task by Id
-- POST /api/TaskItem → Create a task
-- PUT /api/TaskItem/{id} → Update a task
-- DELETE /api/TaskItem/{id} → Delete a task
+# ✨ Features Summary
 
-# Contact
+### 🔧 Task Management  
+- Add, edit, delete  
+- Mark complete/incomplete  
+- Show/hide completed items  
+- User-specific data  
 
-- Ryan Davari
-- Email: ryan.davari@gmail.com
-- Location: Melbourne, Australia
+### 🔒 Security  
+- JWT authentication  
+- ASP.NET Identity  
+- Roles (Admin/User)  
+- Secured endpoints  
+- Angular guards + interceptors  
+
+### 💾 Persistence  
+- SQL Server  
+- EF Core migrations  
+- Fluent configuration  
+- UserId foreign key in TaskItems  
+
+---
+
+# 📬 Contact
+
+**Ryan Davari**  
+📧 ryan.davari@gmail.com  
+📍 Melbourne, Australia
