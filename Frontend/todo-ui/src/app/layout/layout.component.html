@@ -17,6 +17,20 @@
 
         <button mat-button routerLink="/about" routerLinkActive="active-link">About</button>
       </nav>
+
+      <div class="auth-actions" *ngIf="isAuthenticated(); else guestLinks">
+        <span class="user-chip">Hello, {{ currentUser()?.userName }}</span>
+        <button mat-stroked-button color="primary" (click)="logout()">Logout</button>
+      </div>
+
+      <ng-template #guestLinks>
+        <div class="auth-actions">
+          <button mat-button routerLink="/login" routerLinkActive="active-link">Login</button>
+          <button mat-stroked-button color="primary" routerLink="/register" routerLinkActive="active-link">
+            Register
+          </button>
+        </div>
+      </ng-template>
     </mat-toolbar>
   </header>
 

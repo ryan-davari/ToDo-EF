@@ -10,6 +10,7 @@
 .toolbar {
   background-color: vars.$primary-color;
   color: vars.$primary-contrast;
+  gap: 12px;
 }
 
 .app-title {
@@ -24,6 +25,20 @@
 .main-nav {
   display: flex;
   gap: 8px;
+}
+
+.auth-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.12);
+  color: vars.$primary-contrast;
+  font-weight: 500;
 }
 
 .content {
