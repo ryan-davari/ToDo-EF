@@ -1,7 +1,10 @@
-﻿using AutoMapper;
+using AutoMapper;
 using ToDo.Api.Dtos;
 using ToDo.DAL.Models;
 using ToDo.DAL.Repositories;
+using Microsoft.AspNetCore.Http;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace ToDo.Api.Services;
 
@@ -9,11 +12,13 @@ public class TaskItemService : ITaskItemService
 {
     private readonly ITaskItemRepository _repository;
     private readonly IMapper _mapper;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public TaskItemService(ITaskItemRepository repository, IMapper mapper)
+    public TaskItemService(ITaskItemRepository repository, IMapper mapper, IHttpContextAccessor httpContextAccessor)
     {
         _repository = repository;
         _mapper = mapper;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     /// <summary>
@@ -21,7 +26,8 @@ public class TaskItemService : ITaskItemService
     /// </summary>
     public async Task<IEnumerable<TaskItemDto>> GetAllAsync()
     {
-        var items = await _repository.GetAllAsync();
+        var userId = GetCurrentUserId();
+        var items = await _repository.GetAllAsync(userId);
         return _mapper.Map<IEnumerable<TaskItemDto>>(items);
     }
 
@@ -30,7 +36,8 @@ public class TaskItemService : ITaskItemService
     /// </summary>
     public async Task<TaskItemDto?> GetByIdAsync(int id)
     {
-        var item = await _repository.GetByIdAsync(id);
+        var userId = GetCurrentUserId();
+        var item = await _repository.GetByIdAsync(id, userId);
         return item is null ? null : _mapper.Map<TaskItemDto>(item);
     }
 
@@ -41,24 +48,28 @@ public class TaskItemService : ITaskItemService
     {
         ValidateTitle(request.Title);
 
+        var userId = GetCurrentUserId();
+
         var taskItem = _mapper.Map<TaskItem>(request);
         taskItem.Title = taskItem.Title.Trim();
         taskItem.IsComplete = false;
         taskItem.CreatedAt = DateTime.UtcNow;
+        taskItem.UserId = userId;
 
         var created = await _repository.AddAsync(taskItem);
         return _mapper.Map<TaskItemDto>(created);
     }
 
     /// <summary>
-    /// Updates an existing task.  
+    /// Updates an existing task.
     /// Returns null if the task does not exist.
     /// </summary>
     public async Task<TaskItemDto?> UpdateAsync(int id, UpdateTaskItemRequest request)
     {
         ValidateTitle(request.Title);
 
-        var existing = await _repository.GetByIdAsync(id);
+        var userId = GetCurrentUserId();
+        var existing = await _repository.GetByIdAsync(id, userId);
         if (existing is null)
         {
             return null;
@@ -67,7 +78,7 @@ public class TaskItemService : ITaskItemService
         _mapper.Map(request, existing);
         existing.Title = existing.Title.Trim();
 
-        var updated = await _repository.UpdateAsync(existing);
+        var updated = await _repository.UpdateAsync(existing, userId);
         return updated is null ? null : _mapper.Map<TaskItemDto>(updated);
     }
 
@@ -76,7 +87,8 @@ public class TaskItemService : ITaskItemService
     /// </summary>
     public Task<bool> DeleteAsync(int id)
     {
-        return _repository.DeleteAsync(id);
+        var userId = GetCurrentUserId();
+        return _repository.DeleteAsync(id, userId);
     }
 
     /// <summary>
@@ -88,5 +100,18 @@ public class TaskItemService : ITaskItemService
         {
             throw new ArgumentException("Title is required.", nameof(title));
         }
+    }
+
+    private string GetCurrentUserId()
+    {
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? _httpContextAccessor.HttpContext?.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            throw new InvalidOperationException("User context is missing.");
+        }
+
+        return userId;
     }
 }

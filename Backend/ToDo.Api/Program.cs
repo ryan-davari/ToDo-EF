@@ -17,10 +17,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add Controllers to the service collection
 builder.Services.AddControllers();
 
-// Dependency Injection – register app services here
+// Dependency Injection  register app services here
 builder.Services.AddScoped<ITaskItemService, TaskItemService>();
 builder.Services.AddScoped<ITaskItemRepository, TaskItemRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddHttpContextAccessor();
 
 // AutoMapper
 var mapperConfig = new MapperConfiguration(cfg =>
@@ -55,7 +56,7 @@ builder.Services.AddSwaggerGen(option =>
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
+                    Id = "Bearer",
                 }
             },
             Array.Empty<string>()

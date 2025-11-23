@@ -58,6 +58,14 @@ namespace ToDo.DAL
                 entity.Property(x => x.CreatedAt)
                       .IsRequired()
                       .HasDefaultValueSql("GETUTCDATE()");
+
+                entity.Property(x => x.UserId)
+                      .IsRequired();
+
+                entity.HasOne(x => x.User)
+                      .WithMany()
+                      .HasForeignKey(x => x.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

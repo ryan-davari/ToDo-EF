@@ -4,6 +4,7 @@ export interface TaskItemDto {
   description?: string | null;
   isComplete: boolean;
   createdAt: string;
+  userId: string;
 }
 
 export interface CreateTaskItemRequest {

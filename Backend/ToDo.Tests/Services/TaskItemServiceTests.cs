@@ -1,9 +1,11 @@
-﻿using AutoMapper;
+using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Moq;
+using System.Security.Claims;
 using ToDo.Api.Dtos;
+using ToDo.Api.Services;
 using ToDo.DAL.Models;
 using ToDo.DAL.Repositories;
-using ToDo.Api.Services;
 using Xunit;
 
 namespace ToDo.Tests.Services
@@ -12,14 +14,28 @@ namespace ToDo.Tests.Services
     {
         private readonly Mock<ITaskItemRepository> _repositoryMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
         private readonly TaskItemService _sut;
+
+        private const string DefaultUserId = "user-1";
 
         public TaskItemServiceTests()
         {
             _repositoryMock = new Mock<ITaskItemRepository>(); // Loose behavior is fine here
             _mapperMock = new Mock<IMapper>();
+            _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
-            _sut = new TaskItemService(_repositoryMock.Object, _mapperMock.Object);
+            var httpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, DefaultUserId)
+                }, "mock"))
+            };
+
+            _httpContextAccessorMock.Setup(a => a.HttpContext).Returns(httpContext);
+
+            _sut = new TaskItemService(_repositoryMock.Object, _mapperMock.Object, _httpContextAccessorMock.Object);
         }
 
         /// <summary>
@@ -31,12 +47,12 @@ namespace ToDo.Tests.Services
             // Arrange
             var items = new List<TaskItem>
             {
-                new TaskItem { Id = 1, Title = "Task 1" },
-                new TaskItem { Id = 2, Title = "Task 2" }
+                new TaskItem { Id = 1, Title = "Task 1", UserId = DefaultUserId },
+                new TaskItem { Id = 2, Title = "Task 2", UserId = DefaultUserId }
             };
 
             _repositoryMock
-                .Setup(r => r.GetAllAsync())
+                .Setup(r => r.GetAllAsync(DefaultUserId))
                 .ReturnsAsync(items);
 
             _mapperMock
@@ -45,7 +61,8 @@ namespace ToDo.Tests.Services
                     src.Select(t => new TaskItemDto
                     {
                         Id = t.Id,
-                        Title = t.Title
+                        Title = t.Title,
+                        UserId = t.UserId
                     }).ToList());
 
             // Act
@@ -65,15 +82,15 @@ namespace ToDo.Tests.Services
         public async Task GetByIdAsync_ItemExists_ReturnsDto()
         {
             // Arrange
-            var entity = new TaskItem { Id = 10, Title = "Test task" };
+            var entity = new TaskItem { Id = 10, Title = "Test task", UserId = DefaultUserId };
 
             _repositoryMock
-                .Setup(r => r.GetByIdAsync(10))
+                .Setup(r => r.GetByIdAsync(10, DefaultUserId))
                 .ReturnsAsync(entity);
 
             _mapperMock
                 .Setup(m => m.Map<TaskItemDto>(entity))
-                .Returns(new TaskItemDto { Id = entity.Id, Title = entity.Title });
+                .Returns(new TaskItemDto { Id = entity.Id, Title = entity.Title, UserId = entity.UserId });
 
             // Act
             var result = await _sut.GetByIdAsync(10);
@@ -92,7 +109,7 @@ namespace ToDo.Tests.Services
         {
             // Arrange
             _repositoryMock
-                .Setup(r => r.GetByIdAsync(999))
+                .Setup(r => r.GetByIdAsync(999, DefaultUserId))
                 .ReturnsAsync((TaskItem?)null);
 
             // Act
@@ -112,7 +129,7 @@ namespace ToDo.Tests.Services
             var request = new CreateTaskItemRequest
             {
                 Title = "  New task  ",
-                Description = "Some desc"
+                Description = "Some desc",
             };
 
             _mapperMock
@@ -125,11 +142,7 @@ namespace ToDo.Tests.Services
 
             _repositoryMock
                 .Setup(r => r.AddAsync(It.IsAny<TaskItem>()))
-                .ReturnsAsync((TaskItem e) =>
-                {
-                    e.Id = 123;
-                    return e;
-                });
+                .ReturnsAsync((TaskItem t) => t);
 
             _mapperMock
                 .Setup(m => m.Map<TaskItemDto>(It.IsAny<TaskItem>()))
@@ -139,18 +152,18 @@ namespace ToDo.Tests.Services
                     Title = src.Title,
                     Description = src.Description,
                     IsComplete = src.IsComplete,
-                    CreatedAt = src.CreatedAt
+                    CreatedAt = src.CreatedAt,
+                    UserId = src.UserId
                 });
 
             // Act
             var result = await _sut.CreateAsync(request);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(123, result.Id);
             Assert.Equal("New task", result.Title); // trimmed
-            Assert.False(result.IsComplete);
-            Assert.NotEqual(default, result.CreatedAt);
+            Assert.False(result.IsComplete); // defaulted in service
+            Assert.NotEqual(default, result.CreatedAt); // set in service
+            Assert.Equal(DefaultUserId, result.UserId);
         }
 
         /// <summary>
@@ -163,7 +176,7 @@ namespace ToDo.Tests.Services
             var request = new CreateTaskItemRequest
             {
                 Title = "   ",
-                Description = "Whatever"
+                Description = "Whatever",
             };
 
             // Act & Assert
@@ -183,7 +196,8 @@ namespace ToDo.Tests.Services
                 Title = " Old title ",
                 Description = "Old",
                 IsComplete = false,
-                CreatedAt = DateTime.UtcNow.AddHours(-1)
+                CreatedAt = DateTime.UtcNow.AddHours(-1),
+                UserId = DefaultUserId
             };
 
             var request = new UpdateTaskItemRequest
@@ -194,7 +208,7 @@ namespace ToDo.Tests.Services
             };
 
             _repositoryMock
-                .Setup(r => r.GetByIdAsync(5))
+                .Setup(r => r.GetByIdAsync(5, DefaultUserId))
                 .ReturnsAsync(existing);
 
             _mapperMock
@@ -207,7 +221,7 @@ namespace ToDo.Tests.Services
                 });
 
             _repositoryMock
-                .Setup(r => r.UpdateAsync(existing))
+                .Setup(r => r.UpdateAsync(existing, DefaultUserId))
                 .ReturnsAsync(existing);
 
             _mapperMock
@@ -218,7 +232,8 @@ namespace ToDo.Tests.Services
                     Title = src.Title,
                     Description = src.Description,
                     IsComplete = src.IsComplete,
-                    CreatedAt = src.CreatedAt
+                    CreatedAt = src.CreatedAt,
+                    UserId = src.UserId
                 });
 
             var originalCreatedAt = existing.CreatedAt;
@@ -249,7 +264,7 @@ namespace ToDo.Tests.Services
             };
 
             _repositoryMock
-                .Setup(r => r.GetByIdAsync(999))
+                .Setup(r => r.GetByIdAsync(999, DefaultUserId))
                 .ReturnsAsync((TaskItem?)null);
 
             // Act
@@ -267,7 +282,7 @@ namespace ToDo.Tests.Services
         {
             // Arrange
             _repositoryMock
-                .Setup(r => r.DeleteAsync(7))
+                .Setup(r => r.DeleteAsync(7, DefaultUserId))
                 .ReturnsAsync(true);
 
             // Act

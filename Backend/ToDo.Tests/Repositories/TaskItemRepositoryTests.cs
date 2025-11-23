@@ -11,7 +11,9 @@ namespace ToDo.Api.Tests.Repositories;
 
 public class TaskItemRepositoryTests
 {
-    private TaskItemRepository CreateRepository()
+    private const string DefaultUserId = "user-1";
+
+    private (TaskItemRepository Repository, AppDbContext Context) CreateRepository()
     {
         // Use a unique in-memory DB per test to avoid cross-test interference
         var options = new DbContextOptionsBuilder<AppDbContext>()
@@ -19,24 +21,35 @@ public class TaskItemRepositoryTests
             .Options;
 
         var context = new AppDbContext(options);
-        return new TaskItemRepository(context);
+
+        context.Users.Add(new AppUser
+        {
+            Id = DefaultUserId,
+            Email = "user1@example.com",
+            UserName = "user1"
+        });
+
+        context.SaveChanges();
+
+        return (new TaskItemRepository(context), context);
     }
 
     [Fact]
     public async Task AddAsync_AssignsId_AndStoresItem()
     {
         // Arrange
-        var repository = CreateRepository();
+        var (repository, _) = CreateRepository();
         var task = new TaskItem
         {
             Title = "Test task",
             Description = "Test description",
-            IsComplete = false
+            IsComplete = false,
+            UserId = DefaultUserId
         };
 
         // Act
         var added = await repository.AddAsync(task);
-        var all = (await repository.GetAllAsync()).ToList();
+        var all = (await repository.GetAllAsync(DefaultUserId)).ToList();
 
         // Assert
         Assert.NotEqual(0, added.Id);
@@ -59,18 +72,19 @@ public class TaskItemRepositoryTests
     public async Task GetByIdAsync_ReturnsItem_WhenExists()
     {
         // Arrange
-        var repository = CreateRepository();
+        var (repository, _) = CreateRepository();
         var task = new TaskItem
         {
             Title = "Existing task",
             Description = "Existing description",
-            IsComplete = false
+            IsComplete = false,
+            UserId = DefaultUserId
         };
 
         var added = await repository.AddAsync(task);
 
         // Act
-        var result = await repository.GetByIdAsync(added.Id);
+        var result = await repository.GetByIdAsync(added.Id, DefaultUserId);
 
         // Assert
         Assert.NotNull(result);
@@ -84,10 +98,10 @@ public class TaskItemRepositoryTests
     public async Task GetByIdAsync_ReturnsNull_WhenNotFound()
     {
         // Arrange
-        var repository = CreateRepository();
+        var (repository, _) = CreateRepository();
 
         // Act
-        var result = await repository.GetByIdAsync(999);
+        var result = await repository.GetByIdAsync(999, DefaultUserId);
 
         // Assert
         Assert.Null(result);
@@ -97,12 +111,13 @@ public class TaskItemRepositoryTests
     public async Task UpdateAsync_ReturnsUpdatedItem_WhenExists()
     {
         // Arrange
-        var repository = CreateRepository();
+        var (repository, _) = CreateRepository();
         var task = new TaskItem
         {
             Title = "Old title",
             Description = "Old description",
-            IsComplete = false
+            IsComplete = false,
+            UserId = DefaultUserId
         };
 
         var added = await repository.AddAsync(task);
@@ -112,8 +127,8 @@ public class TaskItemRepositoryTests
         added.IsComplete = true;
 
         // Act
-        var updated = await repository.UpdateAsync(added);
-        var fetched = await repository.GetByIdAsync(added.Id);
+        var updated = await repository.UpdateAsync(added, DefaultUserId);
+        var fetched = await repository.GetByIdAsync(added.Id, DefaultUserId);
 
         // Assert
         Assert.NotNull(updated);
@@ -131,17 +146,18 @@ public class TaskItemRepositoryTests
     public async Task UpdateAsync_ReturnsNull_WhenItemDoesNotExist()
     {
         // Arrange
-        var repository = CreateRepository();
+        var (repository, _) = CreateRepository();
         var nonExisting = new TaskItem
         {
             Id = 123,
             Title = "Does not exist",
             Description = "Does not exist",
-            IsComplete = false
+            IsComplete = false,
+            UserId = DefaultUserId
         };
 
         // Act
-        var result = await repository.UpdateAsync(nonExisting);
+        var result = await repository.UpdateAsync(nonExisting, DefaultUserId);
 
         // Assert
         Assert.Null(result);
@@ -151,19 +167,20 @@ public class TaskItemRepositoryTests
     public async Task DeleteAsync_RemovesItem_AndReturnsTrue_WhenExists()
     {
         // Arrange
-        var repository = CreateRepository();
+        var (repository, _) = CreateRepository();
         var task = new TaskItem
         {
             Title = "To delete",
             Description = "To delete desc",
-            IsComplete = false
+            IsComplete = false,
+            UserId = DefaultUserId
         };
 
         var added = await repository.AddAsync(task);
 
         // Act
-        var deleted = await repository.DeleteAsync(added.Id);
-        var fetched = await repository.GetByIdAsync(added.Id);
+        var deleted = await repository.DeleteAsync(added.Id, DefaultUserId);
+        var fetched = await repository.GetByIdAsync(added.Id, DefaultUserId);
 
         // Assert
         Assert.True(deleted);
@@ -174,10 +191,10 @@ public class TaskItemRepositoryTests
     public async Task DeleteAsync_ReturnsFalse_WhenItemDoesNotExist()
     {
         // Arrange
-        var repository = CreateRepository();
+        var (repository, _) = CreateRepository();
 
         // Act
-        var deleted = await repository.DeleteAsync(999);
+        var deleted = await repository.DeleteAsync(999, DefaultUserId);
 
         // Assert
         Assert.False(deleted);
@@ -187,14 +204,15 @@ public class TaskItemRepositoryTests
     public async Task GetAllAsync_ReturnsItemsOrderedByCreatedAt()
     {
         // Arrange
-        var repository = CreateRepository();
+        var (repository, _) = CreateRepository();
 
         var first = new TaskItem
         {
             Title = "First",
             Description = "First desc",
             CreatedAt = DateTime.UtcNow.AddMinutes(-10),
-            IsComplete = false
+            IsComplete = false,
+            UserId = DefaultUserId
         };
 
         var second = new TaskItem
@@ -202,18 +220,45 @@ public class TaskItemRepositoryTests
             Title = "Second",
             Description = "Second desc",
             CreatedAt = DateTime.UtcNow.AddMinutes(-5),
-            IsComplete = true
+            IsComplete = true,
+            UserId = DefaultUserId
         };
 
         await repository.AddAsync(first);
         await repository.AddAsync(second);
 
         // Act
-        var all = (await repository.GetAllAsync()).ToList();
+        var all = (await repository.GetAllAsync(DefaultUserId)).ToList();
 
         // Assert
         Assert.Equal(2, all.Count);
         Assert.Equal("First", all[0].Title);
         Assert.Equal("Second", all[1].Title);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_FiltersByUser()
+    {
+        // Arrange
+        var (repository, _) = CreateRepository();
+
+        await repository.AddAsync(new TaskItem
+        {
+            Title = "Mine",
+            UserId = DefaultUserId
+        });
+
+        await repository.AddAsync(new TaskItem
+        {
+            Title = "Theirs",
+            UserId = "other-user"
+        });
+
+        // Act
+        var all = (await repository.GetAllAsync(DefaultUserId)).ToList();
+
+        // Assert
+        Assert.Single(all);
+        Assert.Equal("Mine", all[0].Title);
     }
 }
