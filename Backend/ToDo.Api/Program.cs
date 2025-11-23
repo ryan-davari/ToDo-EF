@@ -19,6 +19,7 @@ builder.Services.AddControllers();
 // Dependency Injection – register app services here
 builder.Services.AddScoped<ITaskItemService, TaskItemService>();
 builder.Services.AddScoped<ITaskItemRepository, TaskItemRepository>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 // AutoMapper
 var mapperConfig = new MapperConfiguration(cfg =>
@@ -55,7 +56,7 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = true;
-    options.Password.RequiredLength = 12;
+    options.Password.RequiredLength = 10;
 })
 .AddEntityFrameworkStores<AppDbContext>();
 
