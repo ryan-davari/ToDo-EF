@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ToDo.Api.Dtos;
 using ToDo.Api.Services;
 
@@ -7,6 +8,7 @@ namespace ToDo.Api.Controllers
     /// <summary>
     /// Exposes CRUD endpoints for managing task items.
     /// </summary>
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class TaskItemController : ControllerBase
@@ -21,6 +23,7 @@ namespace ToDo.Api.Controllers
         /// <summary>
         /// Returns all tasks currently stored in the system.
         /// </summary>
+        [Authorize]
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<TaskItemDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<TaskItemDto>>> GetAll()
@@ -32,6 +35,7 @@ namespace ToDo.Api.Controllers
         /// <summary>
         /// Returns a single task by its Id.
         /// </summary>
+        [Authorize]
         [HttpGet("{id:int}", Name = "GetTaskItemById")]
         [ProducesResponseType(typeof(TaskItemDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -55,6 +59,7 @@ namespace ToDo.Api.Controllers
         /// <summary>
         /// Creates a new task.
         /// </summary>
+        [Authorize]
         [HttpPost]
         [ProducesResponseType(typeof(TaskItemDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -78,6 +83,7 @@ namespace ToDo.Api.Controllers
         /// Updates an existing task.
         /// Returns 200 with DTO if updated, 204 if not found, 400 if invalid input.
         /// </summary>
+        [Authorize]
         [HttpPut("{id:int}")]
         [ProducesResponseType(typeof(TaskItemDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -108,6 +114,7 @@ namespace ToDo.Api.Controllers
         /// <summary>
         /// Deletes a task by its Id.
         /// </summary>
+        [Authorize]
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
